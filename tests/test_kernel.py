@@ -51,7 +51,7 @@ class TestKernel:
 
     @pytest.mark.asyncio
     async def test_kernel_boot_and_shutdown(self):
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         assert kernel.is_running is False
         await kernel.boot()
         assert kernel.is_running is True
@@ -60,7 +60,7 @@ class TestKernel:
 
     @pytest.mark.asyncio
     async def test_register_agent(self):
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = TestAgent(agent_id="agent-1", name="Test Agent")
         await kernel.register_agent(agent)
@@ -73,7 +73,7 @@ class TestKernel:
 
     @pytest.mark.asyncio
     async def test_register_duplicate_agent(self):
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = TestAgent(agent_id="agent-1", name="Test")
         await kernel.register_agent(agent)
@@ -84,7 +84,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_agent_lifecycle(self):
         """Test full agent lifecycle: register -> start -> pause -> resume -> stop."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = TestAgent(agent_id="agent-1", name="Lifecycle Agent")
         await kernel.register_agent(agent)
@@ -108,7 +108,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_submit_task(self):
         """Test submitting a task to the kernel."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = TestAgent(agent_id="agent-1", name="Worker")
         await kernel.register_agent(agent)
@@ -116,6 +116,12 @@ class TestKernel:
 
         task = Task(input="test task")
         result = await kernel.submit_task(task)
+        
+        import asyncio
+        for _ in range(20):
+            if result.status != TaskStatus.PENDING and result.status != TaskStatus.RUNNING:
+                break
+            await asyncio.sleep(0.05)
 
         assert result.status == TaskStatus.COMPLETED
         assert result.result == "Processed: test task"
@@ -126,11 +132,17 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_submit_task_no_agent(self):
         """Task should fail if no agent is available."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
 
         task = Task(input="orphan task")
         result = await kernel.submit_task(task)
+
+        import asyncio
+        for _ in range(20):
+            if result.status != TaskStatus.PENDING and result.status != TaskStatus.RUNNING:
+                break
+            await asyncio.sleep(0.05)
 
         assert result.status == TaskStatus.FAILED
         assert "No available agent" in result.error
@@ -140,7 +152,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_submit_task_to_specific_agent(self):
         """Task should be executed by the specified agent."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = TestAgent(agent_id="agent-1", name="Worker")
         await kernel.register_agent(agent)
@@ -148,6 +160,12 @@ class TestKernel:
 
         task = Task(input="specific task", agent_id="agent-1")
         result = await kernel.submit_task(task)
+
+        import asyncio
+        for _ in range(20):
+            if result.status != TaskStatus.PENDING and result.status != TaskStatus.RUNNING:
+                break
+            await asyncio.sleep(0.05)
 
         assert result.status == TaskStatus.COMPLETED
         assert result.agent_id == "agent-1"
@@ -157,7 +175,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_task_failure(self):
         """Task should be marked as failed when agent raises exception."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         agent = FailingAgent(agent_id="agent-fail", name="Failing Agent")
         await kernel.register_agent(agent)
@@ -165,6 +183,12 @@ class TestKernel:
 
         task = Task(input="will fail")
         result = await kernel.submit_task(task)
+
+        import asyncio
+        for _ in range(20):
+            if result.status != TaskStatus.PENDING and result.status != TaskStatus.RUNNING:
+                break
+            await asyncio.sleep(0.05)
 
         assert result.status == TaskStatus.FAILED
         assert result.error is not None
@@ -174,7 +198,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_kernel_emits_events(self):
         """Kernel should emit events during lifecycle."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
 
         events = []
@@ -194,7 +218,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_multiple_agents(self):
         """Kernel should support multiple agents."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
 
         agent1 = TestAgent(agent_id="agent-1", name="Agent 1")
@@ -209,7 +233,7 @@ class TestKernel:
     @pytest.mark.asyncio
     async def test_start_nonexistent_agent(self):
         """Starting a non-existent agent should raise."""
-        kernel = Kernel()
+        kernel = Kernel(state_db_path=":memory:")
         await kernel.boot()
         with pytest.raises(ValueError, match="not found"):
             await kernel.start_agent("nonexistent")

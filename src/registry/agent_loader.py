@@ -30,16 +30,26 @@ class ConfiguredAgent(BaseAgent):
         self.definition = definition
         self.system_prompt = definition.system_prompt
         self.permissions = definition.permissions
+        self._active_tasks: List[Task] = []
 
     async def initialize(self) -> None:
         self._set_state(AgentState.IDLE)
 
+    def get_active_tasks(self) -> List[Task]:
+        return list(self._active_tasks)
+
     async def execute(self, task: Task) -> Task:
         self._set_state(AgentState.RUNNING)
-        # Execute task using configured prompt & skills
-        task.complete(output=f"[{self.name} ({self.definition.role})] Processed: {task.input}")
-        self._set_state(AgentState.IDLE)
-        return task
+        self._active_tasks.append(task)
+        try:
+            # Execute task using configured prompt & skills
+            task.complete(output=f"[{self.name} ({self.definition.role})] Processed: {task.input}")
+            return task
+        finally:
+            if task in self._active_tasks:
+                self._active_tasks.remove(task)
+            if not self._active_tasks:
+                self._set_state(AgentState.IDLE)
 
     async def pause(self) -> None:
         self._set_state(AgentState.PAUSED)

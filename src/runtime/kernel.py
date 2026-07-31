@@ -10,6 +10,7 @@ The Kernel is the central orchestrator that ties together:
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Dict, List, Optional
 
 from src.core.agent import BaseAgent
@@ -37,10 +38,11 @@ class Kernel:
         agent_registry: Optional[AgentRegistry] = None,
         skill_registry: Optional[SkillRegistry] = None,
         model_router: Optional[ModelRouter] = None,
+        state_db_path: str = "state.db",
     ) -> None:
         # Core infrastructure
         self.event_bus = event_bus or EventBus()
-        self.state_manager = StateManager()
+        self.state_manager = StateManager(db_path=state_db_path)
         self.lifecycle = LifecycleManager(
             state_manager=self.state_manager,
             event_bus=self.event_bus,
@@ -49,6 +51,8 @@ class Kernel:
         # Registries
         self.agent_registry = agent_registry or AgentRegistry()
         self.skill_registry = skill_registry or SkillRegistry()
+        from src.registry.plugin_registry import PluginRegistry
+        self.plugin_registry = PluginRegistry()
 
         # Model routing
         self.model_router = model_router or ModelRouter()
@@ -57,19 +61,18 @@ class Kernel:
 
         # Runtime state
         self._running = False
-        self._task_queue: List[Task] = []
-
+        from src.runtime.queue import InMemoryTaskQueue
+        self.task_queue = InMemoryTaskQueue()
+        self._worker_task: Optional[asyncio.Task] = None
 
     def _setup_default_providers(self) -> None:
         """Register the default mock provider."""
         self.model_router.register_provider("mock", MockProvider())
 
     async def boot(self) -> None:
-        """Boot the kernel.
-
-        Initializes all subsystems and prepares the runtime.
-        """
+        """Boot the kernel."""
         self._running = True
+        self._worker_task = asyncio.create_task(self._task_worker())
         await self.event_bus.publish(
             Event(
                 type=EventType.AGENT_STARTED,
@@ -78,12 +81,34 @@ class Kernel:
             )
         )
 
-    async def shutdown(self) -> None:
-        """Shut down the kernel.
+    async def _task_worker(self) -> None:
+        """Background worker that pulls tasks from the queue and executes them."""
+        import asyncio
+        while self._running:
+            try:
+                task = await asyncio.wait_for(self.task_queue.dequeue(), timeout=1.0)
+            except asyncio.TimeoutError:
+                continue
+            
+            try:
+                await self._execute_task(task)
+            except Exception as e:
+                task.fail(str(e))
+                await self._publish_task_failed(task)
+            finally:
+                if hasattr(self.task_queue, 'task_done'):
+                    self.task_queue.task_done()
 
-        Terminates all running agents and cleans up resources.
-        """
+    async def shutdown(self) -> None:
+        """Shut down the kernel."""
         self._running = False
+        
+        if self._worker_task:
+            self._worker_task.cancel()
+            try:
+                await self._worker_task
+            except asyncio.CancelledError:
+                pass
 
         # Terminate all agents
         for agent in self.agent_registry.list_agents():
@@ -100,74 +125,52 @@ class Kernel:
             )
         )
 
+    async def load_plugin(self, manifest_path: str) -> None:
+        """Load and initialize a plugin from a manifest path."""
+        definition = self.plugin_registry.loader.load_plugin_manifest(manifest_path)
+        plugin_class = self.plugin_registry.loader.load_plugin_class(definition)
+        plugin_instance = plugin_class(
+            event_bus=self.event_bus,
+            agent_registry=self.agent_registry,
+            skill_registry=self.skill_registry,
+            config=definition.config,
+        )
+        self.plugin_registry.register(plugin_instance, definition)
+        await plugin_instance.initialize()
+
     async def register_agent(self, agent: BaseAgent) -> None:
-        """Register and initialize a new agent.
-
-        Args:
-            agent: The agent instance to register.
-
-        Raises:
-            ValueError: If the agent is already registered.
-        """
+        """Register and initialize a new agent."""
         self.agent_registry.register_agent(agent)
         await self.lifecycle.initialize_agent(agent)
 
     async def unregister_agent(self, agent_id: str) -> None:
-        """Unregister and terminate an agent.
-
-        Args:
-            agent_id: The ID of the agent to remove.
-        """
+        """Unregister and terminate an agent."""
         agent = self.agent_registry.get_agent(agent_id)
         if agent:
             await self.lifecycle.terminate_agent(agent)
             self.agent_registry.unregister_agent(agent_id)
 
     async def start_agent(self, agent_id: str) -> None:
-        """Start a registered agent.
-
-        Args:
-            agent_id: The ID of the agent to start.
-
-        Raises:
-            ValueError: If the agent is not found.
-        """
+        """Start a registered agent."""
         agent = self.agent_registry.get_agent(agent_id)
         if agent is None:
             raise ValueError(f"Agent '{agent_id}' not found")
         await self.lifecycle.start_agent(agent)
 
     async def pause_agent(self, agent_id: str) -> None:
-        """Pause a running agent.
-
-        Args:
-            agent_id: The ID of the agent to pause.
-        """
+        """Pause a running agent."""
         agent = self.agent_registry.get_agent(agent_id)
         if agent:
             await self.lifecycle.pause_agent(agent)
 
     async def resume_agent(self, agent_id: str) -> None:
-        """Resume a paused agent.
-
-        Args:
-            agent_id: The ID of the agent to resume.
-        """
+        """Resume a paused agent."""
         agent = self.agent_registry.get_agent(agent_id)
         if agent:
             await self.lifecycle.resume_agent(agent)
 
     async def submit_task(self, task: Task) -> Task:
-        """Submit a task for execution.
-
-        The task is assigned to the appropriate agent or queued.
-
-        Args:
-            task: The task to execute.
-
-        Returns:
-            The completed task with result.
-        """
+        """Submit a task for asynchronous execution via the queue."""
         await self.event_bus.publish(
             Event(
                 type=EventType.TASK_CREATED,
@@ -175,7 +178,12 @@ class Kernel:
                 data={"task_id": task.id, "type": task.type},
             )
         )
-
+        
+        await self.task_queue.enqueue(task, priority=10)
+        return task
+        
+    async def _execute_task(self, task: Task) -> Task:
+        """Synchronously execute a task (called by the worker)."""
         # Find an agent to execute the task
         if task.agent_id:
             agent = self.agent_registry.get_agent(task.agent_id)
@@ -236,4 +244,4 @@ class Kernel:
     @property
     def is_running(self) -> bool:
         """Check if the kernel is running."""
-        return self._running
+        return self._running

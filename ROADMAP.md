@@ -19,7 +19,15 @@
 - **Next.js UI Dashboard**: Modern React-based frontend (`ui/`) with Workflow Studio, Agents/Skills directory, Memory inspector, and live system metrics.
 - **Verification**: 119 unit tests passing (100% pass rate) and functional React integration.
 
-## Phase 4: Downstream Plugin SDK & Containerized Sandboxing (Upcoming ⏳)
-- **Plugin Manifest Loader (`plugin.yaml`)**: Package downstream apps like CryptoPilot-AI and AirBeat Studio as platform extensions.
+## Phase 4: Production-grade Agent Platform (Phase Next) (Completed ✅)
+- **Plugin System**: `PluginRegistry` and `PluginLoader` for downstream OS extensions (e.g. CryptoPilot-AI).
+- **Tool Registry Expansion**: Centralized executable tools registry with permissions.
+- **Agent Lifecycle Management**: Async hooks (`on_start`, `on_terminate`) and graceful cancellation.
+- **Persistent Agent State**: Thread-safe SQLite database for saving agent states across reboots.
+- **Task Queue Architecture**: Fully asynchronous `InMemoryTaskQueue` and background worker loop in Kernel.
+- **Observability Dashboard Preparation**: `TelemetryTracer` emitting distributed Spans via EventBus.
+
+## Phase 5: Downstream Integrations & Sandboxing (Upcoming ⏳)
+- **Plugin Integration**: Package downstream apps like CryptoPilot-AI and AirBeat Studio.
 - **Tool Execution Sandbox**: Containerized (Docker/Wasm) isolation for code execution tools.
-- **OpenTelemetry Tracing**: Distributed tracing across Agent -> Router -> Tool -> Model execution spans.
+- **Visual Telemetry Dashboard**: Frontend UI for OpenTelemetry traces spanning Agent -> Router -> Tool -> Model execution.

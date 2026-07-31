@@ -9,38 +9,38 @@ class TestStateManager:
     """Test agent state management."""
 
     def test_register_agent(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         info = manager.register("agent-1")
         assert info.agent_id == "agent-1"
         assert info.state == AgentState.IDLE
 
     def test_register_duplicate(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         manager.register("agent-1")
         # Registering again should overwrite (no error)
         info = manager.register("agent-1")
         assert info.agent_id == "agent-1"
 
     def test_unregister_agent(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         manager.register("agent-1")
         manager.unregister("agent-1")
         with pytest.raises(ValueError, match="not registered"):
             manager.get_state("agent-1")
 
     def test_get_state(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         manager.register("agent-1")
         info = manager.get_state("agent-1")
         assert info.agent_id == "agent-1"
 
     def test_get_state_unregistered(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         with pytest.raises(ValueError, match="not registered"):
             manager.get_state("unknown")
 
     def test_list_states(self):
-        manager = StateManager()
+        manager = StateManager(":memory:")
         manager.register("agent-1")
         manager.register("agent-2")
         states = manager.list_states()
@@ -53,7 +53,7 @@ class TestStateTransitions:
     """Test valid and invalid state transitions."""
 
     def setup_method(self):
-        self.manager = StateManager()
+        self.manager = StateManager(":memory:")
         self.manager.register("agent-1")
 
     def test_idle_to_initializing(self):

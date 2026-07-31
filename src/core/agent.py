@@ -92,6 +92,10 @@ class BaseAgent(ABC):
         """
         ...
 
+    async def on_start(self) -> None:
+        """Hook called before the agent starts executing its first task."""
+        pass
+
     @abstractmethod
     async def pause(self) -> None:
         """Pause the agent's execution.
@@ -99,6 +103,10 @@ class BaseAgent(ABC):
         The agent should save its current state and stop processing.
         """
         ...
+
+    async def on_pause(self) -> None:
+        """Hook called when the agent is paused."""
+        pass
 
     @abstractmethod
     async def resume(self) -> None:
@@ -108,6 +116,10 @@ class BaseAgent(ABC):
         """
         ...
 
+    async def on_resume(self) -> None:
+        """Hook called when the agent is resumed."""
+        pass
+
     @abstractmethod
     async def terminate(self) -> None:
         """Terminate the agent.
@@ -115,6 +127,18 @@ class BaseAgent(ABC):
         Clean up all resources, unload skills, and mark as terminated.
         """
         ...
+
+    async def on_terminate(self) -> None:
+        """Hook called when the agent is terminated."""
+        pass
+
+    # ── Task Management ─────────────────────────────────────
+    
+    def get_active_tasks(self) -> List[Task]:
+        """Return the list of tasks currently being processed."""
+        # By default this is managed by the subclass implementation of execute()
+        # but we provide a default empty implementation if not overridden.
+        return []
 
     # ── Skill Management ────────────────────────────────────
 

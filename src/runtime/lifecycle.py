@@ -57,6 +57,7 @@ class LifecycleManager:
         Raises:
             ValueError: If the state transition is invalid.
         """
+        await agent.on_start()
         self._state_manager.transition_to(agent.id, AgentState.RUNNING)
 
         await self._event_bus.publish(
@@ -74,6 +75,7 @@ class LifecycleManager:
             agent: The agent to pause.
         """
         await agent.pause()
+        await agent.on_pause()
         self._state_manager.transition_to(agent.id, AgentState.PAUSED)
 
         await self._event_bus.publish(
@@ -91,6 +93,7 @@ class LifecycleManager:
             agent: The agent to resume.
         """
         await agent.resume()
+        await agent.on_resume()
         self._state_manager.transition_to(agent.id, AgentState.RUNNING)
 
         await self._event_bus.publish(
@@ -107,7 +110,16 @@ class LifecycleManager:
         Args:
             agent: The agent to terminate.
         """
+        # Graceful shutdown of active tasks
+        active_tasks = agent.get_active_tasks()
+        for task in active_tasks:
+            try:
+                task.fail("Agent terminated unexpectedly (Graceful Shutdown).")
+            except Exception:
+                pass
+
         await agent.terminate()
+        await agent.on_terminate()
         self._state_manager.transition_to(agent.id, AgentState.TERMINATED)
 
         await self._event_bus.publish(

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+import sqlite3
+import threading
 from datetime import datetime
 from typing import Any, Dict, Optional, Set
 
@@ -23,10 +26,10 @@ class AgentStateInfo(BaseModel):
 
 
 class StateManager:
-    """Manages state transitions for agents.
+    """Manages state transitions for agents with SQLite persistence.
 
     Ensures that only valid state transitions are allowed,
-    guarding against illegal state changes.
+    guarding against illegal state changes, and persists the data.
     """
 
     VALID_TRANSITIONS: Dict[AgentState, Set[AgentState]] = {
@@ -37,18 +40,62 @@ class StateManager:
         AgentState.TERMINATED: set(),
     }
 
-    def __init__(self) -> None:
+    def __init__(self, db_path: str = "state.db") -> None:
         self._agents: Dict[str, AgentStateInfo] = {}
+        self._db_path = db_path
+        self._lock = threading.Lock()
+        
+        # Use a persistent connection to support :memory: and improve perf
+        self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
+        
+        self._init_db()
+        self._load_from_db()
+
+    def _init_db(self) -> None:
+        with self._lock:
+            self._conn.execute(
+                '''CREATE TABLE IF NOT EXISTS agent_state (
+                    agent_id TEXT PRIMARY KEY,
+                    data TEXT NOT NULL
+                )'''
+            )
+            self._conn.commit()
+
+    def _load_from_db(self) -> None:
+        with self._lock:
+            cursor = self._conn.cursor()
+            cursor.execute("SELECT agent_id, data FROM agent_state")
+            for agent_id, data_str in cursor.fetchall():
+                try:
+                    data = json.loads(data_str)
+                    self._agents[agent_id] = AgentStateInfo(**data)
+                except Exception:
+                    pass
+
+    def _save_to_db(self, info: AgentStateInfo) -> None:
+        with self._lock:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO agent_state (agent_id, data) VALUES (?, ?)",
+                (info.agent_id, info.model_dump_json())
+            )
+            self._conn.commit()
+
+    def _delete_from_db(self, agent_id: str) -> None:
+        with self._lock:
+            self._conn.execute("DELETE FROM agent_state WHERE agent_id = ?", (agent_id,))
+            self._conn.commit()
 
     def register(self, agent_id: str) -> AgentStateInfo:
         """Register a new agent with IDLE state."""
         info = AgentStateInfo(agent_id=agent_id)
         self._agents[agent_id] = info
+        self._save_to_db(info)
         return info
 
     def unregister(self, agent_id: str) -> None:
         """Remove an agent from state tracking."""
         self._agents.pop(agent_id, None)
+        self._delete_from_db(agent_id)
 
     def transition_to(
         self,
@@ -79,6 +126,7 @@ class StateManager:
         if metadata:
             info.metadata.update(metadata)
 
+        self._save_to_db(info)
         return info
 
     def get_state(self, agent_id: str) -> AgentStateInfo:
@@ -97,3 +145,4 @@ class StateManager:
         info = self._agents.get(agent_id)
         if info:
             info.metadata.update(metadata)
+            self._save_to_db(info)
