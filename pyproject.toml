@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ai-agent-os"
+version = "0.1.0"
+description = "A modular operating system for AI agents."
+authors = ["AI Systems Architect <architect@example.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.8.2"
+openai = "^1.37.0"
+anthropic = "^0.31.2"
+python-dotenv = "^1.0.1"
+pyyaml = "^6.0.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+pytest-asyncio = "^0.24.0"
+ruff = "^0.5.5"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

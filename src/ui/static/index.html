@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Agent-OS — Universal Agent Platform</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">OS</div>
+        <div class="brand-title">AI-Agent-OS</div>
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item active" data-target="view-overview">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Overview</span>
+        </li>
+        <li class="nav-item" data-target="view-studio">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.11a2 2 0 00-2.072 1.637l-.27 1.352a2 2 0 001.96 2.39h13.564a2 2 0 001.96-2.39l-.27-1.352z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12"/></svg>
+          <span>Workflow Studio</span>
+        </li>
+        <li class="nav-item" data-target="view-directory">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span>Agents & Skills</span>
+        </li>
+        <li class="nav-item" data-target="view-memory">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span>Memory Inspector</span>
+        </li>
+        <li class="nav-item" data-target="view-models">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+          <span>Model Router</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <span class="card-subtext">v0.2.0 • Genesis_Harness</span>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h1 class="header-title" id="page-title">Overview Dashboard</h1>
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span id="system-status-text">Kernel Online</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="card-subtext" id="budget-counter">Spent: $0.00 / $50.00</div>
+          <select id="header-model-select" class="select-input">
+            <option value="mock">Mock Provider</option>
+            <option value="google">Google Gemini</option>
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="openai">OpenAI Compatible</option>
+            <option value="ollama">Ollama Local</option>
+          </select>
+          <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="content-area">
+        
+        <!-- View 1: Overview -->
+        <div id="view-overview" class="view-panel active">
+          <div class="metrics-grid">
+            <div class="card">
+              <div class="card-title">Active Agents</div>
+              <div class="card-value" id="metric-agents">53</div>
+              <div class="card-subtext">Genesis_Harness & Local</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Loaded Skills</div>
+              <div class="card-value" id="metric-skills">56</div>
+              <div class="card-subtext">SemVer & Dependency Resolved</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Active Provider</div>
+              <div class="card-value" id="metric-provider">Mock</div>
+              <div class="card-subtext">Fallback Chains Active</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Logged Events</div>
+              <div class="card-value" id="metric-events">0</div>
+              <div class="card-subtext">Pub/Sub Bus Activity</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-title">Quick Multi-Agent Demonstration</div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">
+              Trigger the 4-agent sequential topic analysis pipeline: Supervisor -> Research -> Verification -> Report.
+            </p>
+            <button id="quick-demo-btn" class="btn">Launch Topic Analysis Workflow</button>
+          </div>
+        </div>
+
+        <!-- View 2: Multi-Agent Studio -->
+        <div id="view-studio" class="view-panel">
+          <div class="studio-container">
+            <!-- Left Pane: Input & Execution Pipeline -->
+            <div class="pane">
+              <div class="pane-header">
+                <span class="pane-title">Topic Analysis Pipeline</span>
+                <span class="card-subtext">4-Agent Orchestration</span>
+              </div>
+              <div class="pane-body">
+                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Analysis Topic:</label>
+                <textarea id="topic-input" class="prompt-area">Analysiere die wichtigsten KI-Agenten Trends für 2026</textarea>
+                
+                <button id="run-workflow-btn" class="btn" style="width: 100%;">Execute Workflow</button>
+
+                <div class="pipeline-stepper" id="pipeline-stepper">
+                  <div class="step-card" id="step-1">
+                    <div class="step-num">1</div>
+                    <div class="step-info">
+                      <div class="step-name">Supervisor Agent</div>
+                      <div class="step-role">Decomposes research scope & plan</div>
+                    </div>
+                  </div>
+                  <div class="step-card" id="step-2">
+                    <div class="step-num">2</div>
+                    <div class="step-info">
+                      <div class="step-name">Research Agent</div>
+                      <div class="step-role">Gathers domain facts & trend analysis</div>
+                    </div>
+                  </div>
+                  <div class="step-card" id="step-3">
+                    <div class="step-num">3</div>
+                    <div class="step-info">
+                      <div class="step-name">Verification Agent</div>
+                      <div class="step-role">Audits facts, logic & source validity</div>
+                    </div>
+                  </div>
+                  <div class="step-card" id="step-4">
+                    <div class="step-num">4</div>
+                    <div class="step-info">
+                      <div class="step-name">Report Agent</div>
+                      <div class="step-role">Synthesizes final executive report</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="terminal" id="studio-terminal">
+                  <div class="log-line log-info">[System] Ready to run workflow.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Pane: Report Result Output -->
+            <div class="pane">
+              <div class="pane-header">
+                <span class="pane-title">Generated Executive Report</span>
+                <span id="workflow-time-badge" class="card-subtext">Duration: -</span>
+              </div>
+              <div class="pane-body">
+                <div id="report-output" class="report-content">
+                  <p style="color: var(--text-dim); font-style: italic;">
+                    Click "Execute Workflow" to trigger the multi-agent pipeline and generate a structured executive report.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 3: Agents & Skills Directory -->
+        <div id="view-directory" class="view-panel">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="pane-header" style="border: none; padding: 0 0 16px 0;">
+              <span class="pane-title">Registered Agents (Genesis_Harness & Local)</span>
+              <span class="card-subtext" id="agents-count-badge">53 Total</span>
+            </div>
+            <div style="max-height: 240px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Permissions</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody id="agents-table-body">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="pane-header" style="border: none; padding: 0 0 16px 0;">
+              <span class="pane-title">Registered Skills</span>
+              <span class="card-subtext" id="skills-count-badge">56 Total</span>
+            </div>
+            <div style="max-height: 240px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                    <th>Description</th>
+                    <th>Dependencies</th>
+                  </tr>
+                </thead>
+                <tbody id="skills-table-body">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 4: Memory Inspector -->
+        <div id="view-memory" class="view-panel">
+          <div class="metrics-grid">
+            <div class="card">
+              <div class="card-title">Short-Term Memory</div>
+              <div class="card-value" id="stm-turns-count">0</div>
+              <div class="card-subtext">Active Conversation Turns</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Long-Term Memory</div>
+              <div class="card-value" id="ltm-items-count">0</div>
+              <div class="card-subtext">Persistent Key-Values</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Knowledge Chunks</div>
+              <div class="card-value" id="knowledge-chunks-count">0</div>
+              <div class="card-subtext">RAG Document Chunks</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Vector Database Similarity Sandbox</div>
+            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+              <input type="text" id="vector-search-input" class="prompt-area" style="min-height: 40px; margin: 0;" value="AI Agent Architecture" placeholder="Search vector store...">
+              <button id="vector-search-btn" class="btn">Query Cosine Similarity</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Record ID</th>
+                  <th>Content</th>
+                  <th>Similarity Score</th>
+                  <th>Metadata</th>
+                </tr>
+              </thead>
+              <tbody id="vector-results-body">
+                <!-- Filled dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- View 5: Model Router -->
+        <div id="view-models" class="view-panel">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-title">Model Provider Configuration</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px;">
+              <div>
+                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Active Model Provider:</label>
+                <select id="router-provider-select" class="select-input" style="width: 100%;">
+                  <option value="mock">Mock Provider (Default)</option>
+                  <option value="google">Google Gemini</option>
+                  <option value="anthropic">Anthropic Claude</option>
+                  <option value="openai">OpenAI Compatible</option>
+                  <option value="ollama">Ollama Local</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Daily Spend Budget Limit ($):</label>
+                <input type="number" id="budget-input" class="select-input" style="width: 100%;" value="50.0">
+              </div>
+            </div>
+            <button id="save-router-btn" class="btn" style="margin-top: 16px;">Save Router Settings</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
