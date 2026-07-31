@@ -173,7 +173,10 @@ class DemoHTTPRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"error": "Not Found"}, status=404)
 
     def _handle_api_get(self, path: str, params: Dict[str, List[str]]) -> None:
-        if path == "/api/status":
+        if path == "/api/health":
+            self._send_json({"status": "ok", "version": "2.0.0"})
+            
+        elif path == "/api/status":
             history = asyncio.run(system_state.event_bus.get_history(limit=50))
             data = {
                 "status": "online",

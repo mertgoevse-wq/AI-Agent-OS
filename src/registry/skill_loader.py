@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import re
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -19,6 +20,7 @@ from src.schemas.skill_schema import (
     SkillMetadata,
     SkillRequirement,
 )
+from src.schemas.skill_validation import SkillValidationSchema
 
 
 class SkillDependencyError(Exception):
@@ -29,6 +31,9 @@ class SkillDependencyError(Exception):
 
 class SkillLoader:
     """Loader for reading, parsing, and resolving skill definitions."""
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
 
     @classmethod
     def parse_frontmatter_markdown(cls, content: str) -> Tuple[Dict[str, Any], str]:
@@ -55,6 +60,25 @@ class SkillLoader:
 
         # If no frontmatter delimiters, treat whole file as body with empty metadata
         return {}, content.strip()
+
+    def load_skill(self, skill_path: str) -> Optional[Dict[str, Any]]:
+        """Load and validate a skill from a directory."""
+        yaml_path = os.path.join(skill_path, "skill.yaml")
+        if not os.path.exists(yaml_path):
+            self.logger.error(f"Missing skill.yaml in {skill_path}")
+            return None
+            
+        try:
+            with open(yaml_path, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f)
+                
+            # Validate schema
+            validated = SkillValidationSchema(**data)
+            self.logger.info(f"Skill {validated.name} successfully validated and loaded.")
+            return validated.model_dump()
+        except Exception as e:
+            self.logger.error(f"Failed to load or validate skill {skill_path}: {e}")
+            return None
 
     def load_skill_file(self, file_path: str | Path) -> SkillDefinitionExtended:
         """Load a skill from a SKILL.md or skill.yaml file path."""

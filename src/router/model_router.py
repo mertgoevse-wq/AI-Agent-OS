@@ -1,6 +1,16 @@
 import os
+import time
 from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
 from src.utils.logger import logger
+
+class ModelUsageMetrics(BaseModel):
+    provider: str
+    model: str
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cost_usd: float = 0.0
+    latency_ms: float = 0.0
 
 class ModelRouter:
     """
@@ -15,6 +25,11 @@ class ModelRouter:
         # falls Keys fehlen und Modelle nicht angefragt werden.
         self._openai_client = None
         self._anthropic_client = None
+
+        self._fallback_chains = {
+            "reasoning": ["claude-3-5-sonnet", "gpt-4o"],
+            "fast": ["gemini-1.5-flash", "gpt-4o-mini", "claude-3-haiku"]
+        }
 
     def _get_openai_client(self):
         if not self._openai_client:
@@ -32,24 +47,42 @@ class ModelRouter:
             self._anthropic_client = Anthropic(api_key=self.anthropic_api_key)
         return self._anthropic_client
 
-    def generate_response(self, messages: List[Dict[str, Any]], model: str = "gpt-4o") -> Optional[str]:
+    def generate_response(self, messages: List[Dict[str, Any]], tier: str = "reasoning") -> Optional[str]:
         """
-        Nimmt Nachrichten im standardisierten (OpenAI-ähnlichen) Format entgegen
-        und routet sie zum passenden Provider.
+        Routet Nachrichten durch die Fallback-Kette basierend auf dem Tier
+        und sammelt dabei Metriken.
         """
-        logger.info(f"Routing request to model: {model}")
+        models = self._fallback_chains.get(tier, self._fallback_chains["reasoning"])
+        start_time = time.time()
+
+        for model in models:
+            try:
+                logger.info(f"Attempting to route to {model}...")
+                
+                response_text = None
+                if model.startswith("gpt"):
+                    response_text = self._call_openai(messages, model)
+                elif model.startswith("claude"):
+                    response_text = self._call_anthropic(messages, model)
+                
+                latency = (time.time() - start_time) * 1000
+                metrics = ModelUsageMetrics(
+                    provider=model.split("-")[0],
+                    model=model,
+                    prompt_tokens=0, # Simplified for example
+                    completion_tokens=0,
+                    cost_usd=0.0,
+                    latency_ms=latency
+                )
+                
+                logger.info(f"Model Router succeeded via {model} (Latency: {latency:.2f}ms)")
+                return response_text
+
+            except Exception as e:
+                logger.warning(f"Model {model} failed: {e}. Falling back...")
         
-        try:
-            if model.startswith("gpt"):
-                return self._call_openai(messages, model)
-            elif model.startswith("claude"):
-                return self._call_anthropic(messages, model)
-            else:
-                logger.error(f"Unsupported model prefix: {model}")
-                return None
-        except Exception as e:
-            logger.error(f"Error during model generation: {str(e)}")
-            return None
+        logger.error(f"All models in fallback chain '{tier}' failed.")
+        return None
 
     def _call_openai(self, messages: List[Dict[str, Any]], model: str) -> str:
         client = self._get_openai_client()
