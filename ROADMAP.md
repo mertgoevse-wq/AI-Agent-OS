@@ -15,9 +15,9 @@
 
 ## Phase 3: Productization & First Working Demo (Completed ✅)
 - **Multi-Agent Workflow Orchestrator**: 4-agent topic analysis pipeline (`Supervisor` -> `Research` -> `Verification` -> `Report`).
-- **Demo REST API Server (`demo.py`)**: Asynchronous HTTP API server serving static assets and REST endpoints.
-- **Claude Desktop-Inspired UI Dashboard**: Modern SaaS dark theme with Workflow Studio, Agents/Skills directory, Memory inspector, and Model Router settings.
-- **Verification**: 119 unit tests passing (100% pass rate) and browser subagent visual validation.
+- **Demo REST API Server (`demo.py`)**: Asynchronous HTTP API server serving REST endpoints.
+- **Next.js UI Dashboard**: Modern React-based frontend (`ui/`) with Workflow Studio, Agents/Skills directory, Memory inspector, and live system metrics.
+- **Verification**: 119 unit tests passing (100% pass rate) and functional React integration.
 
 ## Phase 4: Downstream Plugin SDK & Containerized Sandboxing (Upcoming ⏳)
 - **Plugin Manifest Loader (`plugin.yaml`)**: Package downstream apps like CryptoPilot-AI and AirBeat Studio as platform extensions.

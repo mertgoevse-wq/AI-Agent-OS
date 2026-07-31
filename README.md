@@ -16,7 +16,7 @@ AI-Agent-OS is a universal, event-driven agent platform designed to host enterpr
   - **Knowledge Memory**: RAG document chunking and indexing.
   - **Vector Database Interface**: Abstract adapter & `InMemoryVectorStore` reference implementation with Cosine similarity search and metadata filtering.
 - **Multi-Agent Sequential & Graph Orchestration**: Built-in 4-agent topic analysis workflow (`Supervisor Agent` -> `Research Agent` -> `Verification Agent` -> `Report Agent`).
-- **Claude Desktop-Inspired UI Dashboard**: Modern SaaS dark theme single-page web app with live workflow studio, memory inspector, agent directory, and real-time log terminal.
+- **Next.js UI Dashboard**: Modern React-based frontend (`ui/`) with Workflow Studio, Agents/Skills directory, Memory inspector, and live system metrics.
 
 ---
 
@@ -32,16 +32,25 @@ Verify the full platform test suite (119 tests):
 pytest -v
 ```
 
-### 2. Launch the Demo UI Dashboard
+### 2. Launch the Platform
+
+**Backend (Python API Server):**
 Start the asynchronous demo web server and kernel runtime:
 ```powershell
 python demo.py
 ```
+The API will run on `http://127.0.0.1:8000`.
+
+**Frontend (Next.js Dashboard):**
+Open a new terminal and start the Next.js development server:
+```powershell
+cd ui
+npm run dev
+```
 Open your browser and navigate to:
 ```
-http://127.0.0.1:8000
+http://localhost:3000
 ```
-*(Optionally pass `--open` to open the web browser automatically: `python demo.py --open`)*
 
 ---
 

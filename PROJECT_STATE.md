@@ -19,14 +19,14 @@ Phase 3 delivered a complete working vertical slice of AI-Agent-OS featuring a C
 2. **Demo REST API & Server (`src/runtime/demo_server.py`, `demo.py`)**:
    - Asynchronous HTTP server exposing `/api/status`, `/api/agents`, `/api/skills`, `/api/models`, `/api/memory`, `/api/tasks/execute`, `/api/workflow/execute`, `/api/events/history`.
    - Automatic scanner for `C:\Genesis_Harness\agents` and `C:\Genesis_Harness\skills`.
-3. **Claude Desktop-Inspired UI Dashboard (`src/ui/static/`)**:
-   - **Calm Dark Palette Design System**: Modern SaaS aesthetic (`#0b0f19`, `#111827`, `#1f2937`, Indigo & Emerald accents).
+3. **Modern Next.js UI Dashboard (`ui/src/app/page.tsx`)**:
+   - **Tech Stack**: Next.js (React), Tailwind CSS, Lucide Icons.
+   - **Calm Dark Palette Design System**: Glassmorphism aesthetic (`bg-surface`, `bg-background`, Indigo & Emerald accents).
    - **Interactive Navigation Views**:
-     - *Overview*: System metrics, active agents, loaded skills, event counter.
-     - *Multi-Agent Workflow Studio*: Interactive topic prompt input, live 4-step progress visualizer, real-time log terminal, rendered Markdown executive report output.
-     - *Agents & Skills Directory*: Table view of all 50+ Genesis_Harness agents and skills.
-     - *Memory Inspector*: Live view of Short-Term, Long-Term, Knowledge Memory, and Vector Store similarity query sandbox.
-     - *Model Router Manager*: Provider switcher & token budget limit slider.
+     - *System Status*: System metrics, kernel state, active agents, loaded skills, API cost tracking.
+     - *Registry*: Grid view of loaded Genesis_Harness agents and skills.
+     - *Memory Inspector*: Live view of Short-Term (Context), Long-Term (K/V), and Knowledge Memory (Vector Store query results).
+     - *Workflow Studio*: Interactive topic prompt input, live execution of the multi-agent orchestrator, real-time event bus stream terminal, rendered final output.
 4. **Automated & Visual Verification**:
    - **119 unit tests passing (100% pass rate)**.
    - Tested visually via browser subagent with recorded WebP session animation.
