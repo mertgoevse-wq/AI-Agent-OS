@@ -7,6 +7,7 @@ from typing import Dict, Any, List
 class PromptAnalyzer:
     """
     Analyzes natural language requests to recommend prompts, agents, and skills based on the prompt library.
+    Advanced version detects project type, language, complexity, specialists, and architectural patterns.
     """
     def __init__(self, prompts_dir: str = "C:/AI/Projects/AI-Agent-OS/omni_library/prompts"):
         self.prompts_dir = prompts_dir
@@ -28,53 +29,100 @@ class PromptAnalyzer:
     def analyze(self, request: str) -> Dict[str, Any]:
         """
         Input: Natural language user request.
-        Output: JSON with task_type, domain, complexity, agents, skills, prompts
+        Output: JSON with advanced extraction and scored prompts.
         """
         request_lower = request.lower()
         
-        task_type = "general"
-        domain = "general"
+        # Extended fields
+        project_type = "general"
+        programming_language = "unspecified"
         complexity = "low"
+        architecture_pattern = "monolith"
         
         agents = set()
         skills = set()
-        selected_prompts = []
+        scored_prompts = []
         
-        # Simple heuristic matching
-        if "saas" in request_lower or "application" in request_lower:
-            task_type = "application_build"
-            domain = "software_development"
+        # Advanced heuristic extraction
+        # Mobile Game
+        if "mobile game" in request_lower or "game" in request_lower:
+            project_type = "mobile_game"
+            programming_language = "C#/C++"
             complexity = "high"
+            architecture_pattern = "game_loop/ecs"
+            agents.update(["GameDeveloper", "GraphicsProgrammer", "QA"])
+            skills.update(["game_design", "rendering"])
             
+        # SaaS Platform
+        elif "saas" in request_lower or "platform" in request_lower:
+            project_type = "saas_platform"
+            programming_language = "TypeScript/Python"
+            complexity = "high"
+            architecture_pattern = "microservices"
+            agents.update(["CTO", "Architect", "Backend", "Frontend", "QA"])
+            skills.update(["architecture", "coding", "testing"])
+            
+        # Scientific Simulation
+        elif "scientific" in request_lower or "simulation" in request_lower:
+            project_type = "scientific_simulation"
+            programming_language = "Python/C++"
+            complexity = "high"
+            architecture_pattern = "data_pipeline/hpc"
+            agents.update(["DataScientist", "SimulationEngineer", "Backend"])
+            skills.update(["mathematics", "performance_optimization"])
+
         for meta in self.prompts_metadata:
-            # Check if any tag, category, or the name matches the request
+            # Base logic to calculate relevance
             match = False
-            if meta.get("name", "").lower() in request_lower:
+            relevance_score = 0.0
+            confidence_score = 0.5
+            
+            prompt_name = meta.get("name", "")
+            
+            if prompt_name.lower() in request_lower:
                 match = True
+                relevance_score += 0.8
+                confidence_score += 0.4
+                
             for tag in meta.get("tags", []):
                 if tag.lower() in request_lower:
                     match = True
+                    relevance_score += 0.5
+                    confidence_score += 0.2
                     break
-            
-            # Additional heuristic: If it's a saas task and we have a SaaS Builder prompt, select it
-            if "saas builder" in meta.get("name", "").lower() and task_type == "application_build":
+                    
+            if project_type == "saas_platform" and "saas builder" in prompt_name.lower():
                 match = True
+                relevance_score = 0.95
+                confidence_score = 0.90
                 
-            if "full stack" in meta.get("name", "").lower() and task_type == "application_build":
+            if project_type == "saas_platform" and "full stack" in prompt_name.lower():
                 match = True
+                relevance_score = 0.85
+                confidence_score = 0.80
 
             if match:
-                selected_prompts.append(meta.get("name"))
+                # Cap scores at 1.0
+                relevance_score = min(1.0, round(relevance_score, 2))
+                confidence_score = min(1.0, round(confidence_score, 2))
+                
+                scored_prompts.append({
+                    "name": prompt_name,
+                    "relevance_score": relevance_score,
+                    "confidence_score": confidence_score
+                })
+                
                 for agent in meta.get("recommended_agents", []):
                     agents.add(agent)
                 for skill in meta.get("recommended_skills", []):
                     skills.add(skill)
                     
         return {
-            "task_type": task_type,
-            "domain": domain,
+            "project_type": project_type,
+            "programming_language": programming_language,
             "complexity": complexity,
-            "agents": list(agents),
+            "architecture_pattern": architecture_pattern,
+            "required_specialists": list(agents),
             "skills": list(skills),
-            "prompts": selected_prompts
+            "prompts": scored_prompts
         }

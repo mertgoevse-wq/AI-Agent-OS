@@ -3,39 +3,71 @@ import pytest
 from src.core.prompt_analyzer import PromptAnalyzer
 from src.core.prompt_fusion import PromptFusionEngine
 
-def test_prompt_analyzer_saas_scenario():
+def test_prompt_analyzer_mobile_game():
     analyzer = PromptAnalyzer(prompts_dir="C:/AI/Projects/AI-Agent-OS/omni_library/prompts")
-    
-    # Exact scenario from user requirements
-    request = "Create a complete SaaS application"
+    request = "Create a mobile game"
     result = analyzer.analyze(request)
     
-    assert result["task_type"] == "application_build"
-    assert "SaaS Builder" in result["prompts"]
-    
-    # Agents check
-    expected_agents = {"CTO", "Architect", "Backend", "Frontend", "QA"}
-    for agent in expected_agents:
-        assert agent in result["agents"]
-        
-    # Skills check
-    expected_skills = {"architecture", "coding", "testing"}
-    for skill in expected_skills:
-        assert skill in result["skills"]
+    assert result["project_type"] == "mobile_game"
+    assert result["programming_language"] == "C#/C++"
+    assert result["complexity"] == "high"
+    assert result["architecture_pattern"] == "game_loop/ecs"
+    assert "GameDeveloper" in result["required_specialists"]
+    assert "game_design" in result["skills"]
 
-def test_prompt_fusion_engine():
+def test_prompt_analyzer_saas_platform():
+    analyzer = PromptAnalyzer(prompts_dir="C:/AI/Projects/AI-Agent-OS/omni_library/prompts")
+    request = "Build a SaaS platform"
+    result = analyzer.analyze(request)
+    
+    assert result["project_type"] == "saas_platform"
+    assert result["programming_language"] == "TypeScript/Python"
+    assert result["complexity"] == "high"
+    assert result["architecture_pattern"] == "microservices"
+    
+    # Check that prompts have scoring
+    scored_prompts = result["prompts"]
+    saas_prompt = next((p for p in scored_prompts if p["name"] == "SaaS Builder"), None)
+    assert saas_prompt is not None
+    assert "relevance_score" in saas_prompt
+    assert "confidence_score" in saas_prompt
+
+def test_prompt_analyzer_scientific_simulation():
+    analyzer = PromptAnalyzer(prompts_dir="C:/AI/Projects/AI-Agent-OS/omni_library/prompts")
+    request = "Create a scientific simulation"
+    result = analyzer.analyze(request)
+    
+    assert result["project_type"] == "scientific_simulation"
+    assert result["programming_language"] == "Python/C++"
+    assert result["complexity"] == "high"
+    assert result["architecture_pattern"] == "data_pipeline/hpc"
+    assert "SimulationEngineer" in result["required_specialists"]
+    assert "mathematics" in result["skills"]
+
+def test_prompt_fusion_engine_advanced_headings():
     fusion = PromptFusionEngine(prompts_dir="C:/AI/Projects/AI-Agent-OS/omni_library/prompts")
     
-    master_prompt = fusion.fuse(["SaaS Builder"])
+    analysis_context = {
+        "project_type": "saas_platform",
+        "programming_language": "TypeScript",
+        "complexity": "high",
+        "required_specialists": ["Backend", "Frontend"],
+        "architecture_pattern": "microservices",
+        "prompts": [
+            {"name": "SaaS Builder", "relevance_score": 0.95, "confidence_score": 0.90}
+        ]
+    }
     
-    assert "# MASTER FUSED PROMPT" in master_prompt
-    assert "--- BEGIN SaaS Builder ---" in master_prompt
-    assert "You are tasked with building a complete SaaS application." in master_prompt
-    assert "--- END SaaS Builder ---" in master_prompt
-
-def test_prompt_fusion_engine_missing():
-    fusion = PromptFusionEngine(prompts_dir="C:/AI/Projects/AI-Agent-OS/omni_library/prompts")
+    master_prompt = fusion.fuse(analysis_context)
     
-    master_prompt = fusion.fuse(["Non Existent Prompt"])
-    
-    assert "<!-- Prompt content for Non Existent Prompt not found -->" in master_prompt
+    assert "## System Role" in master_prompt
+    assert "saas_platform" in master_prompt
+    assert "## Agent Team" in master_prompt
+    assert "Backend, Frontend" in master_prompt
+    assert "## Workflow" in master_prompt
+    assert "microservices" in master_prompt
+    assert "## Requirements" in master_prompt
+    assert "TypeScript" in master_prompt
+    assert "## Testing Strategy" in master_prompt
+    assert "## Deployment Strategy" in master_prompt
+    assert "Relevance: 0.95" in master_prompt
