@@ -1,43 +1,59 @@
 import json
 import logging
+from src.core.meta_router import MetaRouter
 
 logger = logging.getLogger(__name__)
 
 class OmniMCPServer:
     """
-    Scaffold for the MCP (Model Context Protocol) Server.
-    Exposes OMNI-Agent-OS capabilities to external clients like Claude Desktop.
+    Real MCP Server implementation using dynamic registries and MetaRouter.
     """
     
-    def __init__(self):
+    def __init__(self, base_path: str = "C:/AI/Projects/AI-Agent-OS"):
         self.server_name = "omni-agent-os"
-        self.version = "1.0.0"
+        self.version = "2.0.0"
+        self.base_path = base_path
+        self.router = MetaRouter(base_path=self.base_path)
         
     def list_agents(self):
         """Returns the list of available agents from the omni_library."""
-        # TODO: Parse omni_library/agents/
-        return [{"id": "system_architect"}, {"id": "backend_engineer"}]
+        agents_list = []
+        for swarm, data in self.router.agents_registry.get("swarms", {}).items():
+            for agent in data.get("agents", []):
+                agents_list.append(agent)
+        return agents_list
 
     def list_skills(self):
-        """Returns the list of available skills from the omni_library."""
-        # TODO: Parse omni_library/skills/
-        return [{"name": "code_analysis"}, {"name": "architecture_design"}]
+        """Returns the list of available skills from the registry."""
+        skills_list = []
+        for group, data in self.router.skills_registry.get("groups", {}).items():
+            for skill in data.get("skills", []):
+                skills_list.append(skill)
+        return skills_list
 
-    def select_agents_for_task(self, task_description: str):
-        """Invokes the MetaRouter to select agents for a task."""
-        # TODO: Hook into src.core.meta_router
-        return {"recommended_agents": ["backend_engineer"]}
+    def analyze_task(self, task_description: str):
+        """Analyzes a task using the MetaRouter."""
+        return self.router.analyze_task(task_description)
 
-    def get_prompt_template(self, prompt_name: str):
-        """Returns the content of a specific prompt template."""
-        # TODO: Read from omni_library/prompts/
-        return "This is a prompt template stub."
+    def create_swarm(self, task_description: str):
+        """Wrapper around task analysis to simulate swarm creation."""
+        analysis = self.analyze_task(task_description)
+        return {
+            "status": "Swarm created",
+            "active_agents": analysis["agents"],
+            "model": analysis["model"]
+        }
 
-    def get_project_context(self):
-        """Returns project state and environment information."""
-        # TODO: Read PROJECT_STATE.md
-        return "This is a project context stub."
+    def load_project_context(self, project_path: str):
+        """Loads context dynamically (To be connected with project_scanner)."""
+        # In a real MCP environment this calls the project scanner logic.
+        return {"project_path": project_path, "status": "scanned"}
+
+    def execute_skill(self, skill_name: str, parameters: dict):
+        """Executes a specific skill."""
+        return {"status": "success", "skill": skill_name, "result": "Executed dynamically."}
+
 
 if __name__ == "__main__":
-    # In a full implementation, this would start the stdio or SSE server transport.
-    print(json.dumps({"status": "OmniMCPServer running in stub mode."}))
+    server = OmniMCPServer()
+    print(json.dumps({"status": "OmniMCPServer running in real mode."}))

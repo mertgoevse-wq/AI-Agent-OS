@@ -1,4 +1,6 @@
 import json
+import yaml
+import os
 from typing import Dict, Any, List
 import logging
 
@@ -8,66 +10,83 @@ class MetaRouter:
     """
     Intelligently analyzes natural language tasks to recommend swarms, agents, skills, and models.
     """
+    def __init__(self, base_path: str = "C:/AI/Projects/AI-Agent-OS"):
+        self.base_path = base_path
+        self.agents_registry = self._load_registry("agents/registry.yaml")
+        self.skills_registry = self._load_registry("skills/registry.yaml")
+        
+        self.task_analyzer = TaskAnalyzer(self.agents_registry, self.skills_registry)
     
-    def __init__(self):
-        # In a full implementation, these would be loaded from registry.yaml
-        self.keywords_map = {
-            "engineering": ["code", "backend", "frontend", "api", "devops", "implement", "build", "bug", "feature"],
-            "architecture": ["design", "system", "architecture", "diagram", "plan", "infrastructure"],
-            "product": ["ui", "ux", "dashboard", "user", "documentation"],
-            "quality": ["test", "security", "performance", "qa", "audit"],
-            "ai": ["model", "prompt", "rag", "training", "research"]
-        }
-    
+    def _load_registry(self, relative_path: str) -> Dict[str, Any]:
+        path = os.path.join(self.base_path, relative_path)
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            logger.error(f"Failed to load registry {path}: {e}")
+            return {}
+            
     def analyze_task(self, task_description: str) -> Dict[str, Any]:
         """
         Analyzes the task description and outputs a structured JSON plan.
         """
+        return self.task_analyzer.analyze(task_description)
+
+
+class TaskAnalyzer:
+    """
+    Dynamically maps a natural language task to agents and skills based on registry definitions.
+    """
+    def __init__(self, agents_registry: Dict[str, Any], skills_registry: Dict[str, Any]):
+        self.agents_registry = agents_registry
+        self.skills_registry = skills_registry
+        
+    def analyze(self, task_description: str) -> Dict[str, Any]:
         task_lower = task_description.lower()
         
-        # Determine category
-        category = "general"
-        for cat, keywords in self.keywords_map.items():
-            if any(kw in task_lower for kw in keywords):
-                category = cat
-                break
-                
-        # Select agents based on category
-        agents = []
-        if category == "engineering":
-            agents = ["backend_engineer", "api_engineer"]
-        elif category == "architecture":
-            agents = ["system_architect"]
-        elif category == "product":
-            agents = ["product_manager", "ux_designer"]
-        else:
-            agents = ["workflow_engineer"]
-            
-        # Select skills based on keywords
-        skills = []
-        if "backend" in task_lower or "api" in task_lower:
-            skills.append("code_analysis")
-        if "design" in task_lower or "architecture" in task_lower:
-            skills.append("architecture_design")
-        if not skills:
-            skills.append("general_analysis")
-            
-        # Select prompt template
-        prompts = [f"{category}_base_prompt"]
+        selected_agents = []
+        selected_skills = []
+        recommended_model = "gemini-1.5-flash"
+        reason = "Task analyzed dynamically based on available registries."
         
-        # Select models
-        models = []
-        if category in ["architecture", "ai"]:
-            models = ["claude-3-opus", "gemini-1.5-pro"]
-        elif category == "engineering":
-            models = ["deepseek-coder", "claude-3-sonnet"]
-        else:
-            models = ["gemini-1.5-flash"]
+        # Simple dynamic matching for agents based on swarm keys and agent roles
+        swarms = self.agents_registry.get("swarms", {})
+        for swarm_name, swarm_data in swarms.items():
+            if swarm_name in task_lower:
+                for agent in swarm_data.get("agents", []):
+                    if agent["id"] not in selected_agents:
+                        selected_agents.append(agent["id"])
+                    if agent.get("model_tier") == "pro_high":
+                        recommended_model = "claude-3-opus"
+                    
+            for agent in swarm_data.get("agents", []):
+                role = agent.get("role", "").lower()
+                if any(word in task_lower for word in role.split()):
+                    if agent["id"] not in selected_agents:
+                        selected_agents.append(agent["id"])
+                    if agent.get("model_tier") == "pro_high":
+                        recommended_model = "claude-3-opus"
+                        
+        # Fallback to general workflow engineer if no match
+        if not selected_agents:
+            selected_agents = ["workflow_engineer"]
             
+        # Dynamic matching for skills
+        skill_groups = self.skills_registry.get("groups", {})
+        for group_name, group_data in skill_groups.items():
+            if group_name in task_lower:
+                for skill in group_data.get("skills", []):
+                    selected_skills.append(skill["id"])
+                    
+        if not selected_skills:
+            selected_skills = ["general_analysis"]
+            
+        prompts = [f"{selected_agents[0]}_prompt"] if selected_agents else ["default_prompt"]
+        
         return {
-            "task_category": category,
-            "agents": agents,
-            "skills": skills,
+            "agents": selected_agents,
+            "skills": selected_skills,
             "prompts": prompts,
-            "recommended_models": models
+            "model": recommended_model,
+            "reason": reason
         }
