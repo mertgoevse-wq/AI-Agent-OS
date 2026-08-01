@@ -1,0 +1,18 @@
+# OMNI AGENT OS - SYSTEM CONFIG
+version: "2.0"
+environment: "production"
+
+orchestrator:
+  max_concurrent_agents: 10
+  default_timeout_ms: 30000
+
+model_router:
+  primary_reasoning: "gemini-1.5-pro"
+  primary_fast: "gemini-1.5-flash"
+  fallback_enabled: true
+  max_daily_budget_usd: 100.0
+
+security:
+  enforce_rbac: true
+  sandbox_tools: true
+  allow_shell_execution: false

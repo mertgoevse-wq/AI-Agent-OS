@@ -1,0 +1,91 @@
+# OMNI AGENT OS - AGENT REGISTRY
+version: "2.0"
+description: "Central registry for OMNI-Agent-Swarm"
+
+swarms:
+  architecture:
+    description: "System design and technical strategy"
+    agents:
+      - id: "system_architect"
+        role: "System Architect"
+        model_tier: "pro_high"
+      - id: "software_architect"
+        role: "Software Architect"
+        model_tier: "pro_high"
+      - id: "infrastructure_architect"
+        role: "Infrastructure Architect"
+        model_tier: "pro_high"
+
+  engineering:
+    description: "Implementation and deployment"
+    agents:
+      - id: "backend_engineer"
+        role: "Backend Engineer"
+        model_tier: "flash"
+      - id: "frontend_engineer"
+        role: "Frontend Engineer"
+        model_tier: "flash"
+      - id: "api_engineer"
+        role: "API Engineer"
+        model_tier: "flash"
+      - id: "devops_engineer"
+        role: "DevOps Engineer"
+        model_tier: "flash"
+
+  ai:
+    description: "Intelligence and reasoning"
+    agents:
+      - id: "ai_researcher"
+        role: "AI Researcher"
+        model_tier: "pro_high"
+      - id: "ml_engineer"
+        role: "ML Engineer"
+        model_tier: "flash"
+      - id: "prompt_engineer"
+        role: "Prompt Engineer"
+        model_tier: "flash"
+      - id: "agent_designer"
+        role: "Agent Designer"
+        model_tier: "pro_high"
+      - id: "rag_specialist"
+        role: "RAG Specialist"
+        model_tier: "flash"
+
+  automation:
+    description: "Workflow and integration"
+    agents:
+      - id: "workflow_engineer"
+        role: "Workflow Engineer"
+        model_tier: "flash"
+      - id: "tool_integration_agent"
+        role: "Tool Integration Agent"
+        model_tier: "flash"
+      - id: "mcp_specialist"
+        role: "MCP Specialist"
+        model_tier: "flash"
+
+  quality:
+    description: "Validation and security"
+    agents:
+      - id: "security_agent"
+        role: "Security Agent"
+        model_tier: "pro_high"
+      - id: "qa_agent"
+        role: "QA Agent"
+        model_tier: "flash"
+      - id: "performance_agent"
+        role: "Performance Agent"
+        model_tier: "flash"
+
+  product:
+    description: "User experience and product direction"
+    agents:
+      - id: "ux_designer"
+        role: "UX Designer"
+        model_tier: "flash"
+      - id: "documentation_agent"
+        role: "Documentation Agent"
+        model_tier: "flash"
+      - id: "product_manager"
+        role: "Product Manager"
+        model_tier: "pro_high"

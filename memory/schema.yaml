@@ -1,0 +1,20 @@
+# OMNI AGENT OS - MEMORY SCHEMA
+version: "2.0"
+description: "Definition of the 4-tier memory architecture"
+
+tiers:
+  short_term:
+    type: "ContextWindow"
+    ttl: "session"
+    description: "Immediate conversational context per agent"
+  long_term:
+    type: "KeyValueStore"
+    ttl: "persistent"
+    description: "Facts, preferences, and agent profiles"
+  knowledge:
+    type: "VectorStore"
+    embedding_dim: 1536
+    description: "Semantic search over documents and codebase"
+  episodic:
+    type: "EventLog"
+    description: "Sequential action history for replay and evaluation"

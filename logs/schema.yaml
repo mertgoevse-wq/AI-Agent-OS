@@ -1,0 +1,13 @@
+# OMNI AGENT OS - LOG SCHEMA
+version: "1.0"
+description: "Structured event logging for observability"
+
+events:
+  agent_lifecycle:
+    fields: [agent_id, status, timestamp, reason]
+  task_execution:
+    fields: [task_id, agent_id, start_time, end_time, result, error]
+  model_usage:
+    fields: [provider, model, prompt_tokens, completion_tokens, latency, cost]
+  memory_access:
+    fields: [agent_id, tier, operation, query]

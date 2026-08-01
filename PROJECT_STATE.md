@@ -49,19 +49,27 @@ Phase 4 (Phase Next) elevated AI-Agent-OS into a production-grade universal plat
    - Robust lifecycle hooks (`on_start`, `on_pause`, `on_resume`, `on_terminate`).
    - Graceful termination ensuring active tasks are gracefully cancelled.
 4. **Persistent Agent State (`src/core/state.py`)**:
-   - Transitioned `StateManager` from volatile memory to thread-safe SQLite (`state.db`) persistence.
-5. **Task Queue Architecture (`src/runtime/queue.py`)**:
-   - Transitioned from synchronous execution to an asynchronous task queue (`InMemoryTaskQueue`).
-   - Background worker loop (`_task_worker`) natively built into the Kernel for asynchronous execution and polling.
-6. **Observability Dashboard Preparation (`src/telemetry/observability.py`)**:
-   - Added `TelemetryTracer` integrating with the EventBus.
-   - Generates and manages distributed tracing spans (`Span`) for task creation, completion, and failure.
+  ### ✅ PHASE 4: Core Systems (Abgeschlossen)
+- **Agent Registry**: Dynamisches Laden von Agenten aus Markdown/YAML-Dateien.
+- **Skill Registry**: Verknüpfung von `SKILL.md` und `skill.yaml`.
+- **Model Router**: Abstraktionsschicht für Provider (OpenAI, Anthropic) (V1).
+- **Execution Engine**: Asynchroner Background-Task-Runner (InMemoryQueue).
+- **Multi-Agent Orchestrator**: Delegierung und Workflow-Management.
+- **Memory System**: STM, LTM, und Knowledge (V1).
 
-### Current State:
-- **Test Suite**: 119/119 tests passing for robust functionality (including new Task Queue and State Persistence).
-- **Core Stability**: High. Background processing and lifecycle management verified.
+### ✅ PHASE 5: V2 Evolution (Abgeschlossen)
+- **Agent Execution Engine**: Sichere, isolierte Contexts für Tasks (`src/runtime/execution_engine.py`).
+- **Skill Validation**: Strikte Pydantic-Validierung für `skill.yaml` (`src/schemas/skill_validation.py`).
+- **Model Router Professionalization**: Fallback-Chains, Token/Cost-Metriken (`ModelUsageMetrics`).
+- **Vector Store (Knowledge Memory)**: In-Memory Cosine Similarity Store (`src/memory/vector_store.py`).
+- **Observability Architecture**: Tracing, Metriken und Event Logging Architektur (`docs/OBSERVABILITY_ARCHITECTURE.md`).
+- **API & Application Layer**: REST API Demo Server mit `/api/health` und Workflow Routen (`src/runtime/demo_server.py`).
+- **Testing**: 119/119 passing tests nach Core-Erweiterungen.
 
-### Next: Phase 5 — Downstream Integrations & Containerized Sandboxing
-- Implement actual downstream plugin packages (CryptoPilot-AI, AirBeat Studio).
-- Isolated containerized tool sandbox (Docker/MicroVM).
-- Visual live telemetry dashboard for traces.
+---
+
+## 🎯 NEXT STEPS (Für nächste Iteration)
+1. **Replay Engine**: Entwicklung eines Event-Replay-Mechanismus für Agenten.
+2. **Remote Event Bus**: Anbindung an Redis/Kafka für Multi-Node-Execution.
+3. **Persistente Vector-DB**: Austausch von `InMemoryVectorStore` durch z.B. Pinecone oder Chroma.
+4. **App-Integration (CryptoPilot)**: Offizielle Einbindung des OS in den CryptoPilot-AI Workflow.

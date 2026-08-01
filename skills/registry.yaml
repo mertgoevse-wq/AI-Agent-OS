@@ -1,0 +1,26 @@
+# OMNI AGENT OS - SKILL REGISTRY
+version: "2.0"
+description: "Core actionable capabilities for swarms"
+
+skills:
+  code_analysis:
+    description: "Deep static and dynamic analysis of repositories"
+    tier: "core"
+  architecture_design:
+    description: "Generate UML and system architecture diagrams"
+    tier: "core"
+  prompt_optimization:
+    description: "Automatic testing and refining of LLM prompts"
+    tier: "ai"
+  mcp_connector:
+    description: "Model Context Protocol binding tool"
+    tier: "integration"
+  security_audit:
+    description: "Identify vulnerabilities in code and architecture"
+    tier: "quality"
+  performance_profiling:
+    description: "Profile runtime speed and memory usage"
+    tier: "quality"
+  rag_indexing:
+    description: "Chunk and index documents into vector stores"
+    tier: "ai"
