@@ -1,0 +1,7 @@
+name: "SaaS Builder"
+description: "Master prompt for building a complete SaaS application."
+categories: ["software_development", "saas"]
+tags: ["architecture", "fullstack", "startup"]
+complexity: "high"
+recommended_agents: ["CTO", "Architect", "Backend", "Frontend", "QA"]
+recommended_skills: ["architecture", "coding", "testing"]

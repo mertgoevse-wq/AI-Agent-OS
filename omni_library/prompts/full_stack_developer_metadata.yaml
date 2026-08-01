@@ -1,0 +1,7 @@
+name: "Full Stack Developer"
+description: "Prompt for a full stack web developer."
+categories: ["software_development", "web"]
+tags: ["frontend", "backend", "fullstack"]
+complexity: "medium"
+recommended_agents: ["Backend", "Frontend"]
+recommended_skills: ["coding", "testing"]
