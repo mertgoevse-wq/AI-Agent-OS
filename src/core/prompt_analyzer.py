@@ -71,51 +71,29 @@ class PromptAnalyzer:
             agents.update(["DataScientist", "SimulationEngineer", "Backend"])
             skills.update(["mathematics", "performance_optimization"])
 
-        for meta in self.prompts_metadata:
-            # Base logic to calculate relevance
-            match = False
-            relevance_score = 0.0
-            confidence_score = 0.5
+        # Replace heuristic prompt matching with Semantic RAG Retrieval
+        from src.rag.prompt_indexer import PromptIndexer
+        from src.rag.prompt_retriever import PromptRetriever
+        
+        # Build index (In production this would run separately on a schedule or on install)
+        indexer = PromptIndexer()
+        indexer.build_index()
+        
+        retriever = PromptRetriever(indexer)
+        retrieved = retriever.retrieve(request_lower, top_k=3)
+        
+        for item in retrieved:
+            scored_prompts.append({
+                "name": item["name"] if "name" in item else item.get("metadata", {}).get("name", item["id"]),
+                "relevance_score": round(item.get("score", 0.0), 2),
+                "confidence_score": round(item.get("final_score", 0.0), 2)
+            })
             
-            prompt_name = meta.get("name", "")
-            
-            if prompt_name.lower() in request_lower:
-                match = True
-                relevance_score += 0.8
-                confidence_score += 0.4
-                
-            for tag in meta.get("tags", []):
-                if tag.lower() in request_lower:
-                    match = True
-                    relevance_score += 0.5
-                    confidence_score += 0.2
-                    break
-                    
-            if project_type == "saas_platform" and "saas builder" in prompt_name.lower():
-                match = True
-                relevance_score = 0.95
-                confidence_score = 0.90
-                
-            if project_type == "saas_platform" and "full stack" in prompt_name.lower():
-                match = True
-                relevance_score = 0.85
-                confidence_score = 0.80
-
-            if match:
-                # Cap scores at 1.0
-                relevance_score = min(1.0, round(relevance_score, 2))
-                confidence_score = min(1.0, round(confidence_score, 2))
-                
-                scored_prompts.append({
-                    "name": prompt_name,
-                    "relevance_score": relevance_score,
-                    "confidence_score": confidence_score
-                })
-                
-                for agent in meta.get("recommended_agents", []):
-                    agents.add(agent)
-                for skill in meta.get("recommended_skills", []):
-                    skills.add(skill)
+            meta = item.get("metadata", {})
+            for agent in meta.get("recommended_agents", []):
+                agents.add(agent)
+            for skill in meta.get("recommended_skills", []):
+                skills.add(skill)
                     
         return {
             "project_type": project_type,

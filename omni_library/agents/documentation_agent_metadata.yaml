@@ -1,0 +1,4 @@
+name: Documentation Agent
+description: Writes clear and comprehensive technical documentation.
+confidence_score: 0.8
+tags: [docs, writing]

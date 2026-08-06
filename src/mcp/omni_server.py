@@ -1,5 +1,11 @@
 import json
 import logging
+import sys
+import os
+
+# Add the project root to sys.path so we can import 'src'
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 from src.core.meta_router import MetaRouter
 
 logger = logging.getLogger(__name__)
@@ -17,19 +23,15 @@ class OmniMCPServer:
         
     def list_agents(self):
         """Returns the list of available agents from the omni_library."""
-        agents_list = []
-        for swarm, data in self.router.agents_registry.get("swarms", {}).items():
-            for agent in data.get("agents", []):
-                agents_list.append(agent)
-        return agents_list
+        if self.router.uni_registry:
+            return self.router.uni_registry.list_agents()
+        return []
 
     def list_skills(self):
         """Returns the list of available skills from the registry."""
-        skills_list = []
-        for group, data in self.router.skills_registry.get("groups", {}).items():
-            for skill in data.get("skills", []):
-                skills_list.append(skill)
-        return skills_list
+        if self.router.uni_registry:
+            return self.router.uni_registry.list_skills()
+        return []
 
     def analyze_task(self, task_description: str):
         """Analyzes a task using the MetaRouter."""

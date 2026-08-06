@@ -1,0 +1,4 @@
+name: Security Engineer
+description: Ensures the application is secure and follows best practices.
+confidence_score: 0.8
+tags: [security, auditing]

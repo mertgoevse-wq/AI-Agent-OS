@@ -18,6 +18,6 @@ def test_meta_router_architecture():
 
 def test_meta_router_fallback():
     router = MetaRouter()
-    result = router.analyze_task("Do some general task")
+    result = router.analyze_task("Do some nonspecific activity")
     
     assert "workflow_engineer" in result["agents"]

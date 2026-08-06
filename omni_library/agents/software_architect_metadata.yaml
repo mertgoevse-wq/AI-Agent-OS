@@ -1,0 +1,4 @@
+name: Software Architect
+description: Designs the high-level system architecture and data models.
+confidence_score: 0.95
+tags: [architecture, design, backend]

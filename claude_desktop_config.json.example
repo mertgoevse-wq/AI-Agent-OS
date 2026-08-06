@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "omni-agent-os": {
+      "command": "python",
+      "args": [
+        "C:\\AI\\Projects\\AI-Agent-OS\\src\\mcp\\omni_server.py"
+      ]
+    }
+  }
+}

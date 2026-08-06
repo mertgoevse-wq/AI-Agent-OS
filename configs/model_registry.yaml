@@ -1,0 +1,56 @@
+providers:
+  anthropic:
+    default_model: "claude-3-5-sonnet-20240620"
+    api_url: "https://api.anthropic.com/v1/messages"
+    env_key: "ANTHROPIC_API_KEY"
+    capabilities: ["vision", "tools", "caching"]
+    pricing: "premium"
+    max_context: 200000
+
+  openai:
+    default_model: "gpt-4o"
+    api_url: "https://api.openai.com/v1/chat/completions"
+    env_key: "OPENAI_API_KEY"
+    capabilities: ["vision", "tools", "structured_output"]
+    pricing: "premium"
+    max_context: 128000
+
+  gemini:
+    default_model: "gemini-1.5-pro"
+    api_url: "https://generativelanguage.googleapis.com/v1beta/models"
+    env_key: "GEMINI_API_KEY"
+    capabilities: ["vision", "tools", "video"]
+    pricing: "premium"
+    max_context: 2000000
+
+  deepseek:
+    default_model: "deepseek-coder-v2"
+    api_url: "https://api.deepseek.com/v1/chat/completions"
+    env_key: "DEEPSEEK_API_KEY"
+    capabilities: ["tools", "coding"]
+    pricing: "economy"
+    max_context: 128000
+
+  mistral:
+    default_model: "mistral-large-latest"
+    api_url: "https://api.mistral.ai/v1/chat/completions"
+    env_key: "MISTRAL_API_KEY"
+    capabilities: ["tools"]
+    pricing: "premium"
+    max_context: 32000
+
+  openrouter:
+    default_model: "auto"
+    api_url: "https://openrouter.ai/api/v1/chat/completions"
+    env_key: "OPENROUTER_API_KEY"
+    capabilities: ["tools", "vision"]
+    pricing: "variable"
+    max_context: 8000
+
+  ollama:
+    default_model: "llama3"
+    api_url: "http://localhost:11434/api/generate"
+    env_key: null
+    capabilities: ["local"]
+    pricing: "free"
+    max_context: 8192

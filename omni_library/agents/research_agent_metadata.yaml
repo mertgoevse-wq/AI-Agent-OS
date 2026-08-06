@@ -1,0 +1,4 @@
+name: Research Agent
+description: Searches the web and documentation to answer technical questions.
+confidence_score: 0.9
+tags: [research, web, browsing]
